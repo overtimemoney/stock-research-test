@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Stock Research</title>
+<meta name="description" content="Personal stock research: scorecards, value screen, EPS cliff check, comparisons and projections — live data, math shown.">
+<meta name="theme-color" content="#0d0d0f">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stock Research">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="stylesheet" href="styles.css">
+<script>
+/* Apply the saved theme before first paint (dark is the default). */
+try { var _t = localStorage.getItem('sr_theme'); if (_t === 'light' || _t === 'dark') document.documentElement.setAttribute('data-theme', _t); } catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">SR</div>
+    <div class="brand-text">
+      <div class="brand-name">STOCK <span class="gold-text">RESEARCH</span></div>
+      <div class="brand-tag">Every number. One screen.</div>
+    </div>
+    <div class="settings-wrap">
+      <button id="btn-settings" class="gear-btn" type="button" aria-label="Settings" aria-haspopup="true" aria-expanded="false"><svg class="ico ico-f" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M19.30 12.00 L19.17 13.39 L20.94 14.56 L20.13 16.51 L18.05 16.08 L17.75 16.49 L17.42 16.88 L17.16 17.16 L16.08 18.05 L16.51 20.13 L14.56 20.94 L13.39 19.17 L12.89 19.25 L12.38 19.29 L12.00 19.30 L10.61 19.17 L9.44 20.94 L7.49 20.13 L7.92 18.05 L7.51 17.75 L7.12 17.42 L6.84 17.16 L5.95 16.08 L3.87 16.51 L3.06 14.56 L4.83 13.39 L4.75 12.89 L4.71 12.38 L4.70 12.00 L4.83 10.61 L3.06 9.44 L3.87 7.49 L5.95 7.92 L6.25 7.51 L6.58 7.12 L6.84 6.84 L7.92 5.95 L7.49 3.87 L9.44 3.06 L10.61 4.83 L11.11 4.75 L11.62 4.71 L12.00 4.70 L13.39 4.83 L14.56 3.06 L16.51 3.87 L16.08 5.95 L16.49 6.25 L16.88 6.58 L17.16 6.84 L18.05 7.92 L20.13 7.49 L20.94 9.44 L19.17 10.61 L19.25 11.11 L19.29 11.62 Z M12 8.9 a3.1 3.1 0 1 0 0 6.2 a3.1 3.1 0 1 0 0 -6.2 Z"/></svg></button>
+      <div id="settings-menu" class="settings-menu" hidden>
+        <div class="set-h">Reference</div>
+        <button id="menu-journal" class="btn-ghost wide" type="button" style="margin-bottom:6px"><svg class="ico" viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> Journal — your research notes</button>
+        <button id="menu-glossary" class="btn-ghost wide" type="button" style="margin-bottom:4px"><svg class="ico" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Glossary — plain-English terms</button>
+        <div class="set-h">Appearance</div>
+        <div class="seg" role="group" aria-label="Theme">
+          <button id="theme-dark" type="button"><svg class="ico ico-f" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Dark</button>
+          <button id="theme-light" type="button"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Light</button>
+        </div>
+        <div class="set-h">Back up your data</div>
+        <p class="fineprint" style="margin:0 0 8px">Your watchlist, portfolio, journal and saved AI SWOTs live only on this device. Export a backup and keep it somewhere safe (Files, iCloud, email it to yourself). Import a backup here to restore everything.</p>
+        <div class="row-gap">
+          <button id="btn-export" class="btn-gold" type="button"><svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
+          <button id="btn-import" class="btn-ghost" type="button"><svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Import</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+        </div>
+        <div id="backup-status" class="status"></div>
+        <textarea id="backup-text" rows="4" placeholder="Your backup appears here as text too. To restore from text, paste a backup here and tap Import from text."></textarea>
+        <div class="row-gap" style="margin-top:6px">
+          <button id="btn-import-text" class="btn-ghost" type="button">Import from text</button>
+        </div>
+        <!-- Cloud sync (Supabase) — TEST COPY. This whole section starts
+             hidden and stays hidden unless supabase-config.js is filled
+             in; with an empty config the app behaves exactly as before. -->
+        <div id="sync-section" hidden>
+          <div class="set-h">Cloud sync</div>
+          <p class="fineprint" style="margin:0 0 8px">Sign in to back up your watchlist, portfolio, journal, saved projections and AI SWOTs to your Supabase account and sync them across devices. Your data still lives on this device too — sync never blocks the app.</p>
+          <div id="sync-signed-out">
+            <label>Email<input id="sync-email" type="email" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="you@example.com"></label>
+            <label>Password<input id="sync-password" type="password" autocomplete="current-password" placeholder="Password"></label>
+            <div class="row-gap">
+              <button id="sync-signin" class="btn-gold" type="button">Sign in</button>
+              <button id="sync-signup" class="btn-ghost" type="button">Sign up</button>
+            </div>
+          </div>
+          <div id="sync-signed-in" hidden>
+            <p class="fineprint" style="margin:0 0 8px">Signed in as <span id="sync-user"></span></p>
+            <div class="row-gap">
+              <button id="sync-now" class="btn-ghost" type="button">Sync now</button>
+              <button id="sync-signout" class="btn-ghost" type="button">Sign out</button>
+            </div>
+          </div>
+          <div id="sync-status" class="status" role="status"></div>
+        </div>
+        <div class="set-h">Housekeeping</div>
+        <div class="row-gap" style="flex-wrap:wrap">
+          <button id="set-clear-ai" class="btn-ghost" type="button">Clear AI SWOTs</button>
+          <button id="set-clear-cache" class="btn-ghost" type="button">Clear price cache</button>
+          <button id="set-reload" class="btn-ghost" type="button"><svg class="ico" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Reload app</button>
+        </div>
+        <div id="settings-note" class="status"></div>
+        <p class="fineprint">Data: Finviz · Nasdaq · Yahoo · MarketBeat, through your own Cloudflare relay. AI SWOTs: Llama 4 Scout on your Cloudflare account. Saved data never leaves this device — only the tickers you look up are sent.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="app">
+  <!-- SCORECARD -->
+  <section id="tab-scorecard" class="tab active">
+    <form id="search-form" class="search-row" autocomplete="off">
+      <input id="search-input" type="text" inputmode="text" autocapitalize="characters"
+             autocorrect="off" spellcheck="false" placeholder="Ticker — e.g. MU, AAPL, NVDA" aria-label="Ticker symbol">
+      <button type="submit" class="btn-gold">Research</button>
+    </form>
+    <div id="score-status" class="status" role="status"></div>
+    <div id="score-result"></div>
+    <div id="score-empty" class="empty-note">
+      <h2>Look up any stock</h2>
+      <p>Get a valuation scorecard with the math shown, your 4-point value screen,
+         an EPS cliff check, and a 1-year chart. Data is pulled live — nothing to update by hand.</p>
+    </div>
+  </section>
+
+  <!-- COMPARE -->
+  <section id="tab-compare" class="tab">
+    <h2 class="tab-title">Compare <span class="gold-text">3 stocks</span></h2>
+    <form id="compare-form" class="compare-inputs" autocomplete="off">
+      <input id="cmp-1" type="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Ticker 1" aria-label="First ticker">
+      <input id="cmp-2" type="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Ticker 2" aria-label="Second ticker">
+      <input id="cmp-3" type="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Ticker 3" aria-label="Third ticker">
+      <button type="submit" class="btn-gold">Compare</button>
+    </form>
+    <div id="compare-status" class="status" role="status"></div>
+    <div id="compare-result"></div>
+  </section>
+
+  <!-- TOOLS -->
+  <section id="tab-tools" class="tab">
+    <h2 class="tab-title">Projection <span class="gold-text">Builder</span></h2>
+    <div class="card">
+      <form id="pj-load-form" class="search-row" autocomplete="off" style="margin-bottom:12px">
+        <input id="pj-ticker" type="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Ticker — load live data" aria-label="Projection ticker">
+        <button type="submit" class="btn-gold">Load stock</button>
+      </form>
+      <div id="pj-status" class="status" role="status" style="margin:0 2px 8px"></div>
+      <div class="grid2">
+        <label>Current price $<input id="pj-price" type="number" step="any" min="0" placeholder="0.00"></label>
+        <label>EPS base $<input id="pj-eps" type="number" step="any" placeholder="e.g. next-year EPS"></label>
+        <label>Flat growth % / yr (fallback)<input id="pj-growth" type="number" step="any" value="15"></label>
+        <label>Years<input id="pj-years" type="number" step="1" min="1" max="5" value="3"></label>
+        <label>Exit P/E<input id="pj-mult" type="number" step="any" value="18"></label>
+      </div>
+      <div class="pj-path-head">Year-by-year EPS <span>— the first row is the TTM (the last twelve months, already reported, with its actual growth); the rest is the analysts' forecast path, auto-filled when you load a stock. Every box is editable: change an EPS and its growth % updates; change a growth % and that year's EPS updates. * = extrapolated past the last analyst year, with growth fading toward the long-run rate instead of repeating the last year forever.</span></div>
+      <div id="pj-path"></div>
+      <button id="pj-run" class="btn-gold wide" type="button">Build projections</button>
+      <div id="pj-result" class="tool-result"></div>
+      <div id="pj-saved"></div>
+      <p class="fineprint">Bear = each year's growth −5 pts &amp; exit P/E −2 · Base = the path above · Bull = growth +5 pts &amp; exit P/E +2.
+      Projections are only as good as the assumptions — they're yours, not a forecast.</p>
+    </div>
+
+    <h2 class="tab-title"><span class="gold-text">Charts</span></h2>
+    <div class="card">
+      <form id="qm-load-form" class="search-row" autocomplete="off" style="margin-bottom:12px">
+        <input id="qm-ticker" type="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Ticker — revenue, earnings, margins" aria-label="Charts ticker">
+        <button type="submit" class="btn-gold">Load stock</button>
+      </form>
+      <div id="qm-status" class="status" role="status" style="margin:0 2px 8px"></div>
+      <div id="qm-body" hidden>
+        <div class="seg" role="group" aria-label="Metrics period" style="margin-bottom:12px">
+          <button type="button" data-qmfreq="q" class="active">Quarterly</button>
+          <button type="button" data-qmfreq="y">Yearly</button>
+        </div>
+        <div class="qm-chips" id="qm-chips">
+          <button type="button" data-qm="revenue" class="on">Revenue</button>
+          <button type="button" data-qm="netIncome">Net income</button>
+          <button type="button" data-qm="eps">EPS</button>
+          <button type="button" data-qm="fcf">Free cash flow</button>
+          <button type="button" data-qm="grossMargin">Gross margin</button>
+          <button type="button" data-qm="operMargin">Operating margin</button>
+          <button type="button" data-qm="netMargin">Net margin</button>
+        </div>
+        <div id="qm-chart"></div>
+        <p class="fineprint" id="qm-note"></p>
+      </div>
+    </div>
+
+    <h2 class="tab-title">Compound <span class="gold-text">Calculator</span></h2>
+    <div class="card">
+      <div class="grid2">
+        <label>Initial investment $<input id="cc-init" type="number" step="any" min="0" value="10000"></label>
+        <label>Monthly contribution $<input id="cc-monthly" type="number" step="any" min="0" value="500"></label>
+        <label>Years<input id="cc-years" type="number" step="1" min="1" max="50" value="20"></label>
+        <label>Annual return %<input id="cc-rate" type="number" step="any" value="10"></label>
+      </div>
+      <button id="cc-run" class="btn-gold wide" type="button">Calculate</button>
+      <div id="cc-result" class="tool-result"></div>
+      <p class="fineprint">For scale: the S&amp;P 500's long-run average is roughly 10%/yr before inflation.
+      The gap between average and a few points better is what compounding does over decades.</p>
+    </div>
+  </section>
+
+  <!-- WATCHLIST -->
+  <section id="tab-watchlist" class="tab">
+    <h2 class="tab-title">Watch<span class="gold-text">list</span></h2>
+    <div id="scan-card"></div>
+    <form id="wl-form" class="wl-inputs" autocomplete="off">
+      <input id="wl-ticker" type="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Ticker" aria-label="Watchlist ticker">
+      <input id="wl-target" type="number" step="any" min="0" placeholder="Target buy $" aria-label="Target buy price">
+      <button type="submit" class="btn-gold">Add</button>
+    </form>
+    <div class="row-between wl-tools">
+      <span id="wl-status" class="status"></span>
+      <span class="wl-tools-r">
+        <label class="wl-sort-lab">Sort
+          <select id="wl-sort" aria-label="Sort watchlist">
+            <option value="added">Date added</option>
+            <option value="valuation">Valuation: high → low</option>
+            <option value="valuation-asc">Valuation: low → high</option>
+            <option value="target">Closest to target</option>
+            <option value="ticker">Ticker A–Z</option>
+          </select>
+        </label>
+        <button id="wl-refresh" class="btn-mini" type="button"><svg class="ico" style="width:14px;height:14px;vertical-align:-2px" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Refresh prices</button>
+      </span>
+    </div>
+    <div id="wl-list"></div>
+    <p class="fineprint">Your watchlist and journal live only on this device — back them up from the <svg class="ico ico-f" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M19.30 12.00 L19.17 13.39 L20.94 14.56 L20.13 16.51 L18.05 16.08 L17.75 16.49 L17.42 16.88 L17.16 17.16 L16.08 18.05 L16.51 20.13 L14.56 20.94 L13.39 19.17 L12.89 19.25 L12.38 19.29 L12.00 19.30 L10.61 19.17 L9.44 20.94 L7.49 20.13 L7.92 18.05 L7.51 17.75 L7.12 17.42 L6.84 17.16 L5.95 16.08 L3.87 16.51 L3.06 14.56 L4.83 13.39 L4.75 12.89 L4.71 12.38 L4.70 12.00 L4.83 10.61 L3.06 9.44 L3.87 7.49 L5.95 7.92 L6.25 7.51 L6.58 7.12 L6.84 6.84 L7.92 5.95 L7.49 3.87 L9.44 3.06 L10.61 4.83 L11.11 4.75 L11.62 4.71 L12.00 4.70 L13.39 4.83 L14.56 3.06 L16.51 3.87 L16.08 5.95 L16.49 6.25 L16.88 6.58 L17.16 6.84 L18.05 7.92 L20.13 7.49 L20.94 9.44 L19.17 10.61 L19.25 11.11 L19.29 11.62 Z M12 8.9 a3.1 3.1 0 1 0 0 6.2 a3.1 3.1 0 1 0 0 -6.2 Z"/></svg> settings menu (top right).</p>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section id="tab-portfolio" class="tab">
+    <h2 class="tab-title">Port<span class="gold-text">folio</span></h2>
+    <div class="pf-view-switch" role="tablist" aria-label="Portfolio view">
+      <button type="button" id="pf-view-overview" class="on">Overview</button>
+      <button type="button" id="pf-view-news">News</button>
+    </div>
+    <div id="pf-news" hidden></div>
+    <div id="pf-summary" class="pf-ov"></div>
+    <div id="pf-bench" class="pf-ov"></div>
+    <div class="card pf-add-card pf-ov">
+      <button id="pf-add-toggle" class="pf-add-head" type="button" aria-expanded="false"><span>Add a holding</span><span class="pf-chev">▾</span></button>
+      <div id="pf-add-body" hidden>
+      <form id="pf-form" autocomplete="off">
+        <div class="grid2">
+          <label>Ticker<input id="pf-ticker" type="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="e.g. KO"></label>
+          <label>How many shares do you own?<input id="pf-shares" type="number" step="any" min="0" placeholder="e.g. 12.5"></label>
+        </div>
+        <div class="grid2">
+          <label>Are dividends reinvested?<select id="pf-drip"><option value="yes">Yes — reinvested (DRIP)</option><option value="no">No — paid out as cash</option></select></label>
+          <label>Average cost per share $ (optional)<input id="pf-cost" type="number" step="any" min="0" placeholder="What you paid, on average"></label>
+        </div>
+        <button type="submit" class="btn-gold wide">Add to portfolio</button>
+      </form>
+      </div>
+    </div>
+    <div class="row-between wl-tools pf-ov">
+      <span id="pf-status" class="status"></span>
+      <span class="wl-tools-r"><button id="pf-refresh" class="btn-mini" type="button"><svg class="ico" style="width:14px;height:14px;vertical-align:-2px" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Refresh prices</button></span>
+    </div>
+    <div id="pf-list" class="pf-ov"></div>
+    <div id="pf-closed" class="pf-ov"></div>
+    <p class="fineprint pf-ov">Your portfolio lives only on this device — back it up from the <svg class="ico ico-f" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M19.30 12.00 L19.17 13.39 L20.94 14.56 L20.13 16.51 L18.05 16.08 L17.75 16.49 L17.42 16.88 L17.16 17.16 L16.08 18.05 L16.51 20.13 L14.56 20.94 L13.39 19.17 L12.89 19.25 L12.38 19.29 L12.00 19.30 L10.61 19.17 L9.44 20.94 L7.49 20.13 L7.92 18.05 L7.51 17.75 L7.12 17.42 L6.84 17.16 L5.95 16.08 L3.87 16.51 L3.06 14.56 L4.83 13.39 L4.75 12.89 L4.71 12.38 L4.70 12.00 L4.83 10.61 L3.06 9.44 L3.87 7.49 L5.95 7.92 L6.25 7.51 L6.58 7.12 L6.84 6.84 L7.92 5.95 L7.49 3.87 L9.44 3.06 L10.61 4.83 L11.11 4.75 L11.62 4.71 L12.00 4.70 L13.39 4.83 L14.56 3.06 L16.51 3.87 L16.08 5.95 L16.49 6.25 L16.88 6.58 L17.16 6.84 L18.05 7.92 L20.13 7.49 L20.94 9.44 L19.17 10.61 L19.25 11.11 L19.29 11.62 Z M12 8.9 a3.1 3.1 0 1 0 0 6.2 a3.1 3.1 0 1 0 0 -6.2 Z"/></svg> settings menu (top right). Prices and dividend figures are estimates from the latest data the app could fetch; your brokerage statement is the official record.</p>
+  </section>
+
+  <!-- JOURNAL -->
+  <section id="tab-journal" class="tab">
+    <h2 class="tab-title">Research <span class="gold-text">Journal</span></h2>
+    <div id="journal-list"></div>
+    <div class="card" id="journal-editor-card">
+      <h3 id="journal-editor-title">New entry</h3>
+      <form id="journal-form" autocomplete="off">
+        <label>Ticker<input id="j-ticker" type="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="e.g. MU"></label>
+        <label>Thesis<textarea id="j-thesis" rows="3" placeholder="Why this stock, in plain English"></textarea></label>
+        <label>Catalysts<textarea id="j-catalysts" rows="2" placeholder="What could drive it up"></textarea></label>
+        <div class="grid3">
+          <label>Bull case<textarea id="j-bull" rows="2"></textarea></label>
+          <label>Base case<textarea id="j-base" rows="2"></textarea></label>
+          <label>Bear case<textarea id="j-bear" rows="2"></textarea></label>
+        </div>
+        <label>Review date<input id="j-review" type="date"></label>
+        <div class="row-gap">
+          <button type="submit" class="btn-gold">Save entry</button>
+          <button type="button" id="j-cancel" class="btn-ghost" hidden>Cancel edit</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- GLOSSARY -->
+  <section id="tab-glossary" class="tab">
+    <h2 class="tab-title">Plain-English <span class="gold-text">Glossary</span></h2>
+    <input id="gloss-search" type="search" placeholder="Search terms…" aria-label="Search glossary">
+    <div id="gloss-list"></div>
+  </section>
+</main>
+
+<nav class="tabbar" role="navigation" aria-label="Sections">
+  <button data-tab="scorecard" class="active"><span class="tab-ico"><svg class="ico ico-f" viewBox="0 0 24 24"><rect x="4" y="12.5" width="4.4" height="7.5" rx="1.7"/><rect x="9.8" y="7.5" width="4.4" height="12.5" rx="1.7"/><rect x="15.6" y="3" width="4.4" height="17" rx="1.7"/></svg></span>Scorecard</button>
+  <button data-tab="compare"><span class="tab-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M4 6h12"/><polyline points="12 2 16 6 12 10"/><path d="M20 18H8"/><polyline points="12 14 8 18 12 22"/></svg></span>Compare</button>
+  <button data-tab="tools"><span class="tab-ico"><svg class="ico" viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="2"/><line x1="8.5" y1="6.5" x2="15.5" y2="6.5"/><line x1="8.5" y1="11" x2="8.6" y2="11"/><line x1="12" y1="11" x2="12.1" y2="11"/><line x1="15.4" y1="11" x2="15.5" y2="11"/><line x1="8.5" y1="14.5" x2="8.6" y2="14.5"/><line x1="12" y1="14.5" x2="12.1" y2="14.5"/><line x1="15.4" y1="14.5" x2="15.5" y2="14.5"/><line x1="8.5" y1="18" x2="15.5" y2="18"/></svg></span>Tools</button>
+  <button data-tab="watchlist"><span class="tab-ico"><svg class="ico ico-f" viewBox="0 0 24 24"><polygon points="12 2.5 15.09 8.76 22 9.77 17 14.64 18.18 21.52 12 18.27 5.82 21.52 7 14.64 2 9.77 8.91 8.76"/></svg></span>Watchlist</button>
+  <button data-tab="portfolio"><span class="tab-ico"><svg class="ico ico-f" viewBox="0 0 24 24"><path d="M12 12 L12 3.2 A8.8 8.8 0 1 0 20.8 12 Z"/><path d="M13.6 3.5 A8.3 8.3 0 0 1 20.3 10.4 L13.6 10.4 Z"/></svg></span>Portfolio</button>
+</nav>
+
+<script src="supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
